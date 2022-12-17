@@ -1,0 +1,26 @@
+{
+  "name": "easy-vue",
+  "version": "1.0.0",
+  "description": "一个简易版本的vue",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wing-9527/easy-vue.git"
+  },
+  "keywords": [
+    "easy",
+    "easy-vue"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Wing-9527/easy-vue/issues"
+  },
+  "homepage": "https://github.com/Wing-9527/easy-vue#readme",
+  "devDependencies": {
+    "typescript": "^4.9.4"
+  }
+}
