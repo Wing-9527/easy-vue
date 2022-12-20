@@ -1,1 +1,3 @@
-export function mutableCollectionHandlers() {}
+export const mutableCollectionHandlers: ProxyHandler<any> = {
+  // get: /*#__PURE__*/ createInstrumentationGetter(false, false)
+}
