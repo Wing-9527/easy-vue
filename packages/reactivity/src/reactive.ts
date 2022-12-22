@@ -13,7 +13,7 @@ export const enum ReactiveFlags {
   IS_REACTIVE = '__v_isReactive', // 是 reactive 状态
   IS_READONLY = '__v_isReadonly', // 是 readonly 状态
   IS_SHALLOW = '__v_isShallow', // 是 shallow 状态
-  RAW = '__v_raw' // 表示proxy 对应的源数据， target 已经是 proxy 对象时会有该属性
+  RAW = '__v_raw' // 表示proxy 对应的源数据，target 已经是 proxy 对象时会有该属性
 }
 
 function createReactiveObject(target: object, baseHandlers: object, collectionHandlers: object, proxyMap: WeakMap<any, any>) {
@@ -39,9 +39,23 @@ export function reactive(target: object) {
 }
 
 /** 
- * TODO
+ * utilities
  */
-export function isReactive() {}
+export function isReadonly(value: any): boolean {
+  return value && value[ReactiveFlags.IS_READONLY]
+}
+
+export function isReactive(value: any): boolean {
+  if (isReadonly(value)) {
+    return value && value[ReactiveFlags.RAW]
+  }
+  return value && value[ReactiveFlags.IS_REACTIVE]
+}
+
+export function isProxy(value: any): boolean {
+  return isReactive(value) || isReadonly(value)
+}
+
 export function toRaw() {}
 export function markRaw() {}
 
