@@ -13,7 +13,7 @@ function createGetter(isReadonly = false, shallow = false) {
       return !isReadonly
     } else if (key === ReactiveFlags.IS_READONLY) { // 当 key 是 __v_isReadonly，则判定为已经是一个只读对象
       return isReadonly
-    } else if ( // 当 key 是 __v_raw，判定为已经是一个代理对象。当缓存中有该代理对象时，采用惰性函数操作，直接返回该对象，不在进行响应式处理
+    } else if ( // 当 key 是 __v_raw，判定为已经是一个代理对象。当缓存中有该代理对象时，直接返回原始的被代理对象
       key === ReactiveFlags.RAW &&
       receiver ===
         (isReadonly
@@ -47,6 +47,7 @@ function createGetter(isReadonly = false, shallow = false) {
      * TODO
      * ? 如果属性是对象，为什么要对属性再做一次代理
      *    答：猜测，为了递归做依赖收集？
+     *    答：待验证：不把 a.b 变成proxy的话，直接修改 a.b.c 无法触发页面更新
      */
 
     return res
