@@ -1,3 +1,4 @@
+import { track, trigger } from "./effect"
 import {
   ReactiveFlags,
   reactiveMap,
@@ -8,7 +9,7 @@ import {
 
 // 创建getter
 function createGetter(isReadonly = false, shallow = false) {
-  return function get(target: object, key: string | symbol, receiver: object) {
+  return function get(target: any, key: string | symbol, receiver: object) {
     if (key === ReactiveFlags.IS_REACTIVE) { // 当 key 是 __v_isReactive，则判定为已经是一个响应式对象
       return !isReadonly
     } else if (key === ReactiveFlags.IS_READONLY) { // 当 key 是 __v_isReadonly，则判定为已经是一个只读对象
@@ -29,10 +30,9 @@ function createGetter(isReadonly = false, shallow = false) {
     }
     // 获取当前结果
     const res = Reflect.get(target, key, receiver)
-    /**
-     * TODO
-     * ! 依赖收集
-     */
+
+    // 依赖收集
+    track(target, key)
 
     if (shallow) {
       return res
@@ -55,14 +55,22 @@ function createGetter(isReadonly = false, shallow = false) {
 }
 
 // 创建setter
-function createSetter() {}
+function createSetter() {
+  return function set(target: any, key: string | symbol, value: any, receiver: object) {
+    // debugger
+    let oldValue = target[key]
+    target[key] = value
+    trigger(target, key)
+    return value
+  }
+}
 
 const get = createGetter()
 const set = createSetter()
 
 export const mutableHandlers: ProxyHandler<object> = {
   get,
-  // set,
+  set,
   // deleteProperty,
   // has,
   // ownKeys
