@@ -1,5 +1,5 @@
 import { reactive } from "../src/reactive"
-import { effect } from "../src/effect"
+import { effect, stop } from "../src/effect"
 
 describe('reactivity/effect', () => {
   test('effect track and trigger', () => {
@@ -53,4 +53,50 @@ describe('reactivity/effect', () => {
     let runnerRes = runner()
     expect(runnerRes).toBe('noob')
   })
+  test('effect stop', () => {
+    let outterCount = null
+
+    let reactiveData = reactive({
+      count: 1
+    })
+
+    let runner = effect(() => {
+      outterCount = reactiveData.count + 1
+      console.log('stop attached')
+    })
+
+    expect(outterCount).toBe(2)
+    reactiveData.count++
+    expect(outterCount).toBe(3)
+    reactiveData.count++
+    expect(outterCount).toBe(4)
+
+    // stop effect
+    stop(runner)
+    reactiveData.count++
+    expect(outterCount).toBe(4)
+
+    // ! restar
+    // runner()
+    // @ts-ignore
+    runner.effect.run()
+    expect(outterCount).toBe(5)
+  })
+  it("stop", () => {
+    let dummy;
+    const obj = reactive({ prop: 1 });
+    const runner = effect(() => {
+      dummy = obj.prop;
+    });
+    obj.prop = 2;
+    expect(dummy).toBe(2);
+    stop(runner);
+    // obj.prop = 3
+    obj.prop++;
+    expect(dummy).toBe(2);
+
+    // stopped effect should still be manually callable
+    runner();
+    expect(dummy).toBe(3);
+  });
 })

@@ -14,6 +14,8 @@ class ReactiveEffect {
   public run() {
     activeEffect = this // run的时候，每次更新activeEffect指向
     this._fn()
+    // ! 重置
+    activeEffect = void 0
   }
   /**
    * stop 方法，就是将 ReactiveEffect 上对应的副作用函数全部清除
@@ -25,13 +27,14 @@ class ReactiveEffect {
   }
 }
 
-/**
- * TODO: 修复类型报错bug
- * ? 源码此处：let activeEffect: ReactiveEffect | undefined
- * ? 我这边按照源码方式初始化，`npm run test` 在 vitest 中测试无法通过，报类型错误
- * ! 解决方式：必须 new ReactiveEffect(() => {}) 初始化赋值
- */
-let activeEffect: ReactiveEffect = new ReactiveEffect(() => {})
+// /**
+//  * TODO: 修复类型报错bug
+//  * ? 源码此处：let activeEffect: ReactiveEffect | undefined
+//  * ? 我这边按照源码方式初始化，`npm run test` 在 vitest 中测试无法通过，报类型错误
+//  * ! 解决方式：必须 new ReactiveEffect(() => {}) 初始化赋值
+//  */
+// let activeEffect: ReactiveEffect | undefined = new ReactiveEffect(() => {})
+let activeEffect: ReactiveEffect | undefined
 let targetMap = new WeakMap() // 副作用映射树
 
 /**
@@ -51,28 +54,35 @@ export function effect(fn: EffectFn) {
 
 // track dependencies
 export function track(target: any, key: string | symbol | number) {
-  let depsMap = targetMap.get(target)
-  if (!depsMap) {
-    targetMap.set(target, (depsMap = new Map()))
+  if (activeEffect) {
+    let depsMap = targetMap.get(target)
+    if (!depsMap) {
+      targetMap.set(target, (depsMap = new Map()))
+    }
+    let dep = depsMap.get(key)
+    if (!dep) {
+      depsMap.set(key, (dep = new Set()))
+    }
+    dep.add(activeEffect)
+    trackEffects(dep)
   }
-  let dep = depsMap.get(key)
-  if (!dep) {
-    depsMap.set(key, (dep = new Set()))
-  }
-  dep.add(activeEffect)
-  debugger
-  trackEffects(dep)
 }
 
 // trigger effect
 export function trigger(target: any, key: string | symbol | number) {
   let depsMap = targetMap.get(target)
-  let dep = depsMap.get(key)
-  dep.forEach((effect: ReactiveEffect) => {
-    // if (effect !== activeEffect) { // 防止无限循环
-      effect.run()
-    // }
-  })
+  if (depsMap?.size) { // fix: vitest属性报错
+    let dep = depsMap.get(key)
+    dep.forEach((effect: ReactiveEffect) => {
+      // if (effect !== activeEffect) { // 防止无限循环
+        effect.run()
+      // }
+    })
+  }
+}
+
+export function stop(runner: any) {
+  runner.effect.stop()
 }
 
 function trackEffects(dep: any) {
@@ -85,9 +95,12 @@ function trackEffects(dep: any) {
 
 // 清除副作用函数
 function cleanupEffect(effect: ReactiveEffect) {
-  let { deps } = effect
-  if (deps.length) {
-    deps.forEach((dep: Set<any>) => dep.delete(effect))
-    deps.length = 0
-  }
+  // let { deps } = effect
+  // if (deps.length) {
+  //   deps.forEach((dep: Set<any>) => dep.delete(effect))
+  //   deps.length = 0
+  // }
+  effect.deps.forEach((dep: Set<any>) => {
+    dep.delete(effect)
+  })
 }
