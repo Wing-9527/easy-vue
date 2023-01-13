@@ -6,14 +6,14 @@ type EffectFn = (...args: unknown[]) => unknown
 // }
 
 class ReactiveEffect {
-  public _fn: EffectFn
+  public fn: EffectFn
   public deps = []
   constructor(fn: EffectFn) {
-    this._fn = fn
+    this.fn = fn
   }
   public run() {
     activeEffect = this // run的时候，每次更新activeEffect指向
-    this._fn()
+    this.fn()
     // ! 重置
     activeEffect = void 0
   }
@@ -45,7 +45,7 @@ let targetMap = new WeakMap() // 副作用映射树
 export function effect(fn: EffectFn) {
   let _effect = new ReactiveEffect(fn)
   _effect.run()
-  let runner = _effect._fn.bind(_effect)
+  let runner = _effect.fn.bind(_effect)
   // TODO: ts类型报错
   // @ts-ignore
   runner.effect = _effect
