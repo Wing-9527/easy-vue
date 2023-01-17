@@ -1,5 +1,6 @@
 import { reactive } from "../src/reactive"
-import { effect, stop } from "../src/effect"
+import { effect, stop, } from "../src/effect"
+import { vi } from 'vitest'
 
 describe('reactivity/effect', () => {
   test('effect track and trigger', () => {
@@ -82,6 +83,9 @@ describe('reactivity/effect', () => {
     runner.effect.run()
     expect(outterCount).toBe(5)
   })
+
+  // ! other test case 👇
+
   it("stop", () => {
     let dummy;
     const obj = reactive({ prop: 1 });
@@ -98,5 +102,15 @@ describe('reactivity/effect', () => {
     // stopped effect should still be manually callable
     runner();
     expect(dummy).toBe(3);
+  });
+
+  test("events: onStop", () => {
+    const onStop = vi.fn();
+    const runner = effect(() => {}, {
+      onStop,
+    });
+
+    stop(runner);
+    expect(onStop).toHaveBeenCalled();
   });
 })

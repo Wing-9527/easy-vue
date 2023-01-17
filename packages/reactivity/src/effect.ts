@@ -1,3 +1,5 @@
+import { extend } from "@easy-vue/shared"
+
 type EffectFn = (...args: unknown[]) => unknown
 
 // interface ReactiveEffectRunner {
@@ -8,6 +10,8 @@ type EffectFn = (...args: unknown[]) => unknown
 class ReactiveEffect {
   public fn: EffectFn
   public deps = []
+  public active = true // active 的作用，防止多次调用 cleanupEffect 清除依赖，浪费性能
+  public onStop?: () => unknown
   constructor(fn: EffectFn) {
     this.fn = fn
   }
@@ -23,7 +27,13 @@ class ReactiveEffect {
    * stop 方法内的 this 为 ReactiveEffect 实例
    */
   public stop() {
-    cleanupEffect(this)
+    if (this.active) {
+      cleanupEffect(this)
+      if (this.onStop) {
+        this.onStop()
+      }
+      this.active = false
+    }
   }
 }
 
@@ -42,8 +52,9 @@ let targetMap = new WeakMap() // 副作用映射树
  * ? 猜测1：方便能从 targetMap 映射树中删除对应的 effectFn（相关代码：dep.delete(effect) ）
  * ? 猜测2：方便 stop 停止后能再次触发响应式？
  */
-export function effect(fn: EffectFn) {
+export function effect(fn: EffectFn, options?: object) {
   let _effect = new ReactiveEffect(fn)
+  extend(_effect, options)
   _effect.run()
   let runner = _effect.fn.bind(_effect)
   // TODO: ts类型报错
