@@ -1,7 +1,10 @@
-import { reactive } from '../src/reactive'
+import { 
+  reactive,
+  isReactive
+} from '../src/reactive'
 
 describe('reactivity/reactive', () => {
-  test("Object", () => {
+  test("reactive object", () => {
     const original = { foo: 1 };
     const observed = reactive(original);
     expect(observed).not.toBe(original);
@@ -18,4 +21,12 @@ describe('reactivity/reactive', () => {
 
     console.log('observed is reactive', observed.__v_isReactive)
   });
+  test('it is should reaactive', () => {
+    const original = { value: 1 };
+    const observed = reactive(original);
+
+    expect(isReactive(original)).toBe(undefined)
+    expect(!!isReactive(original)).toBe(false)
+    expect(isReactive(observed)).toBe(true)
+  })
 })
