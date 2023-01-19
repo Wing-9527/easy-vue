@@ -1,4 +1,4 @@
-import { isObject } from "@easy-vue/shared"
+import { isObject, extend } from "@easy-vue/shared"
 import { track, trigger } from "./effect"
 import {
   ReactiveFlags,
@@ -42,6 +42,9 @@ function createGetter(isReadonly = false, shallow = false) {
       track(target, key)
     }
 
+    /**
+     * ! 如果是 shallow 一层，就不需要将深层嵌套转为响应式
+     */
     if (shallow) {
       return res
     }
@@ -80,6 +83,7 @@ function createSetter() {
 const get = createGetter()
 const set = createSetter()
 const readonlyGet = createGetter(true)
+const shallowReadonlyGet = createGetter(true, true)
 
 export const mutableHandlers: ProxyHandler<object> = {
   get,
@@ -92,7 +96,15 @@ export const mutableHandlers: ProxyHandler<object> = {
 export const readonlyHandlers: ProxyHandler<any> = {
   get: readonlyGet,
   set() { // 不允许改变值
-    warn('\`readonly\` can not update value')
+    warn('Update failed: target is readonly')
     return true
   }
 }
+
+export const shallowReadonlyHandlers: ProxyHandler<object> = extend(
+  {},
+  readonlyHandlers,
+  {
+    get: shallowReadonlyGet
+  }
+)

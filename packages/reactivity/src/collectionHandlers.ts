@@ -3,3 +3,5 @@ export const mutableCollectionHandlers: ProxyHandler<any> = {
 }
 
 export const readonlyCollectionHandlers: ProxyHandler<any> = {}
+
+export const shallowReadonlyCollectionHandlers: ProxyHandler<any> = {}

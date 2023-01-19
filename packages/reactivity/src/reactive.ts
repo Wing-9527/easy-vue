@@ -1,11 +1,13 @@
 import { isObject } from '@easy-vue/shared'
 import {
   mutableHandlers,
-  readonlyHandlers
+  readonlyHandlers,
+  shallowReadonlyHandlers
 } from './baseHandlers'
 import {
   mutableCollectionHandlers,
-  readonlyCollectionHandlers
+  readonlyCollectionHandlers,
+  shallowReadonlyCollectionHandlers
 } from './collectionHandlers'
 
 // 缓存
@@ -40,6 +42,9 @@ function createReactiveObject(target: object, isReadonly: boolean, baseHandlers:
   return proxy
 }
 
+/**
+ * api
+ */
 export function reactive(target: object) {
   return createReactiveObject(
     target,
@@ -50,7 +55,10 @@ export function reactive(target: object) {
   )
 }
 
-/** @function 只读 */
+/**
+ * api
+ * @function 只读
+ */
 export function readonly(target: object) {
   return createReactiveObject(
     target,
@@ -58,6 +66,19 @@ export function readonly(target: object) {
     readonlyHandlers,
     readonlyCollectionHandlers,
     readonlyMap
+  )
+}
+
+/**
+ * api
+ */
+export function shallowReadonly(target: object) {
+  return createReactiveObject(
+    target,
+    true,
+    shallowReadonlyHandlers,
+    shallowReadonlyCollectionHandlers,
+    shallowReadonlyMap
   )
 }
 
