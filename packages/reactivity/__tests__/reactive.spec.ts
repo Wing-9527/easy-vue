@@ -29,4 +29,26 @@ describe('reactivity/reactive', () => {
     expect(!!isReactive(original)).toBe(false)
     expect(isReactive(observed)).toBe(true)
   })
+  test('nested reactive', () => {
+    let raw = {
+      nested: {
+        name: '1'
+      },
+      list: [
+        1,
+        {
+          p: 'p'
+        }
+      ]
+    }
+
+    let obs = reactive(raw)
+
+    expect(isReactive(obs)).toBe(true)
+    expect(isReactive(obs.nested)).toBe(true)
+    expect(isReactive(obs.list)).toBe(true)
+    expect(isReactive(obs.list[0])).toBe(undefined)
+    expect(!!isReactive(obs.list[0])).toBe(false)
+    expect(isReactive(obs.list[1])).toBe(true)
+  })
 })

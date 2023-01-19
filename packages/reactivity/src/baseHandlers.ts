@@ -1,11 +1,15 @@
+import { isObject } from "@easy-vue/shared"
 import { track, trigger } from "./effect"
 import {
   ReactiveFlags,
   reactiveMap,
   shallowReactiveMap,
   readonlyMap,
-  shallowReadonlyMap
+  shallowReadonlyMap,
+  reactive,
+  readonly
 } from "./reactive"
+import { warn } from "./warning"
 
 // 创建getter
 function createGetter(isReadonly = false, shallow = false) {
@@ -31,8 +35,12 @@ function createGetter(isReadonly = false, shallow = false) {
     // 获取当前结果
     const res = Reflect.get(target, key, receiver)
 
-    // 依赖收集
-    track(target, key)
+    /**
+     * ! 非只读，依赖收集
+     */
+    if (!isReadonly) {
+      track(target, key)
+    }
 
     if (shallow) {
       return res
@@ -49,6 +57,9 @@ function createGetter(isReadonly = false, shallow = false) {
      *    答：猜测，为了递归做依赖收集？
      *    答：待验证：不把 a.b 变成proxy的话，直接修改 a.b.c 无法触发页面更新
      */
+    if (isObject(res)) {
+      return isReadonly ? readonly(res) : reactive(res)
+    }
 
     return res
   }
@@ -58,15 +69,17 @@ function createGetter(isReadonly = false, shallow = false) {
 function createSetter() {
   return function set(target: any, key: string | symbol, value: any, receiver: object) {
     // debugger
-    let oldValue = target[key]
-    target[key] = value
+    // ? let oldValue = target[key]
+    let res = Reflect.set(target, key, value, receiver)
     trigger(target, key)
-    return value
+    return res
   }
 }
 
+// ! 缓存变量
 const get = createGetter()
 const set = createSetter()
+const readonlyGet = createGetter(true)
 
 export const mutableHandlers: ProxyHandler<object> = {
   get,
@@ -74,4 +87,12 @@ export const mutableHandlers: ProxyHandler<object> = {
   // deleteProperty,
   // has,
   // ownKeys
+}
+
+export const readonlyHandlers: ProxyHandler<any> = {
+  get: readonlyGet,
+  set() { // 不允许改变值
+    warn('\`readonly\` can not update value')
+    return true
+  }
 }

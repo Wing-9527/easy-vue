@@ -1,6 +1,12 @@
 import { isObject } from '@easy-vue/shared'
-import { mutableHandlers } from './baseHandlers'
-import { mutableCollectionHandlers } from './collectionHandlers'
+import {
+  mutableHandlers,
+  readonlyHandlers
+} from './baseHandlers'
+import {
+  mutableCollectionHandlers,
+  readonlyCollectionHandlers
+} from './collectionHandlers'
 
 // 缓存
 export const reactiveMap = new WeakMap()
@@ -16,7 +22,7 @@ export const enum ReactiveFlags {
   RAW = '__v_raw' // 表示proxy 对应的源数据，target 已经是 proxy 对象时会有该属性
 }
 
-function createReactiveObject(target: object, baseHandlers: object, collectionHandlers: object, proxyMap: WeakMap<any, any>) {
+function createReactiveObject(target: object, isReadonly: boolean, baseHandlers: object, collectionHandlers: object, proxyMap: WeakMap<any, any>) {
   // 非对象类型，直接返回
   if (!isObject(target)) {
     return target
@@ -35,11 +41,28 @@ function createReactiveObject(target: object, baseHandlers: object, collectionHa
 }
 
 export function reactive(target: object) {
-  return createReactiveObject(target, mutableHandlers, mutableCollectionHandlers, reactiveMap)
+  return createReactiveObject(
+    target,
+    false,
+    mutableHandlers,
+    mutableCollectionHandlers,
+    reactiveMap
+  )
+}
+
+/** @function 只读 */
+export function readonly(target: object) {
+  return createReactiveObject(
+    target,
+    true,
+    readonlyHandlers,
+    readonlyCollectionHandlers,
+    readonlyMap
+  )
 }
 
 /** 
- * utilities
+ * @desc utilities
  */
 export function isReadonly(value: any): boolean {
   return value && value[ReactiveFlags.IS_READONLY]
