@@ -1,7 +1,7 @@
 {
   "name": "easy-vue",
   "version": "1.0.0",
-  "description": "一个简易版本的vue",
+  "description": "一个简易版本的vue3",
   "main": "index.js",
   "scripts": {
     "test": "vitest"
