@@ -100,6 +100,10 @@ export function isProxy(value: any): boolean {
   return isReactive(value) || isReadonly(value)
 }
 
-export function toRaw() {}
+export function toRaw(observed: any): any {
+  const raw = observed && observed[ReactiveFlags.RAW]
+  return raw ? toRaw(raw) : observed
+}
+
 export function markRaw() {}
 
