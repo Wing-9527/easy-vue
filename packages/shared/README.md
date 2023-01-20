@@ -1,2 +1,2 @@
-# Easy Vue Shared
+# Easy vue shared
 共享方法
