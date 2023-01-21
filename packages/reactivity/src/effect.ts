@@ -1,4 +1,4 @@
-import { extend } from "@easy-vue/shared"
+import { extend, isArray } from "@easy-vue/shared"
 
 type EffectFn = (...args: unknown[]) => unknown
 
@@ -74,21 +74,16 @@ export function track(target: any, key: string | symbol | number) {
     if (!dep) {
       depsMap.set(key, (dep = new Set()))
     }
-    dep.add(activeEffect)
     trackEffects(dep)
   }
 }
 
-// trigger effect
+// trigger
 export function trigger(target: any, key: string | symbol | number) {
   let depsMap = targetMap.get(target)
   if (depsMap?.size) { // fix: vitest属性报错
     let dep = depsMap.get(key)
-    dep.forEach((effect: ReactiveEffect) => {
-      // if (effect !== activeEffect) { // 防止无限循环
-        effect.run()
-      // }
-    })
+    triggerEffects(dep)
   }
 }
 
@@ -96,12 +91,23 @@ export function stop(runner: any) {
   runner.effect.stop()
 }
 
-function trackEffects(dep: any) {
+export function trackEffects(dep: any) {
   // console.log('activeEffect', activeEffect)
   // debugger
-  // TODO: ts类型报错
-  // @ts-ignore
-  activeEffect.deps.push(dep)
+  if (activeEffect) {
+    dep.add(activeEffect)
+    // @ts-ignore TODO: ts类型报错
+    activeEffect!.deps.push(dep)
+  }
+}
+
+export function triggerEffects(dep: any) {
+  let effects = isArray(dep) ? dep : [...dep]
+  effects.forEach((effect: ReactiveEffect) => {
+    // if (effect !== activeEffect) { // 防止无限循环
+      effect.run()
+    // }
+  })
 }
 
 // 清除副作用函数
