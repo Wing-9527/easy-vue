@@ -1,4 +1,5 @@
 import { extend, isArray } from "@easy-vue/shared"
+import { ComputedRefImpl } from "./computed"
 
 type EffectFn = (...args: unknown[]) => unknown
 
@@ -7,10 +8,11 @@ type EffectFn = (...args: unknown[]) => unknown
 //   effect: ReactiveEffect
 // }
 
-class ReactiveEffect {
+export class ReactiveEffect {
   public fn: EffectFn
   public deps = []
   public active = true // active 的作用，防止多次调用 cleanupEffect 清除依赖，浪费性能
+  public computed?: ComputedRefImpl
   public onStop?: () => unknown
   constructor(fn: EffectFn) {
     this.fn = fn
