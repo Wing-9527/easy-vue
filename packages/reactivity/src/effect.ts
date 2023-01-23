@@ -57,8 +57,7 @@ export function effect(fn: EffectFn, options?: object) {
   extend(_effect, options)
   _effect.run()
   let runner = _effect.fn.bind(_effect)
-  // TODO: ts类型报错
-  // @ts-ignore
+  // @ts-ignore TODO: ts类型报错
   runner.effect = _effect
   return runner
 }
