@@ -8,6 +8,9 @@ type EffectFn = (...args: unknown[]) => unknown
 //   effect: ReactiveEffect
 // }
 
+/**
+ * TODO: ReactiveEffect 第二个参数 scheduler 待实现
+ */
 export class ReactiveEffect {
   public fn: EffectFn
   public deps = []
@@ -19,9 +22,10 @@ export class ReactiveEffect {
   }
   public run() {
     activeEffect = this // run的时候，每次更新activeEffect指向
-    this.fn()
+    let res = this.fn()
     // ! 重置
     activeEffect = void 0
+    return res
   }
   /**
    * stop 方法，就是将 ReactiveEffect 上对应的副作用函数全部清除

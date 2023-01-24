@@ -1,6 +1,7 @@
 import { NOOP, isFunction } from "@easy-vue/shared";
 import { ReactiveFlags } from "./reactive";
 import { ReactiveEffect } from "./effect";
+import { trackRefValue, triggerRefValue } from "./ref";
 
 export type ComputedGetter = (...args: unknown[]) => unknown
 export type ComputedSetter = (value: any) => void
@@ -10,9 +11,27 @@ export interface WritableComputedOptions {
   set: ComputedSetter
 }
 
+/**
+ * 问题1：
+ *    无法满足 tase-case 2，Computed.value 作为被监听对象 发生变化时，无法触发对应的副作用函数 
+ *    TODO: 还需对 Computed.value 做处理
+ *    track ref value
+ *    trigger ref value
+ * 问题2：
+ *    还未对 debugOptions 做处理
+ *    TODO: debugOptions.onTrack debugOptions.onTrigger
+ * 问题3：
+ *    计算属性缓存未实现
+ *    TODO: _dirty
+ * 问题4：
+ *    需要实现 ReactiveEffect 第二个参数 scheduler，配合实现计算属性缓存
+ *    TODO: ReactiveEffect scheduler
+ */
 export class ComputedRefImpl {
   public effect: ReactiveEffect
   public readonly [ReactiveFlags.IS_READONLY]: boolean
+  public _dirty = true
+  public _value: unknown
   constructor(
     getter: ComputedGetter,
     private readonly _setter: ComputedSetter,
@@ -20,13 +39,19 @@ export class ComputedRefImpl {
     isSSR: boolean
   ) {
     this.effect = new ReactiveEffect(getter)
+    // triggerRefValue(this)
     this[ReactiveFlags.IS_READONLY] = isReadonly
     this.effect.active = !isSSR
     this.effect.computed = this
   }
 
   get value() {
-    return this.effect.run()
+    // trackRefValue(this)
+    // if (this._dirty) {
+    //   this._dirty = false
+      this._value = this.effect.run()
+    // }
+    return this._value
   }
 
   set value(newValue: any) {
