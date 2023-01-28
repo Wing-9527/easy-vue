@@ -9,7 +9,7 @@ export default {
   entry: './packages/easy-vue/src/index.ts',
   output: {
     path: path.resolve(__dirname, './packages/easy-vue/lib/webpack-lib'),
-    filename: 'easy-vue.js',
+    filename: 'easy-vue.umd.js',
     library: {
       name: 'EasyVue',
       type: 'umd',
