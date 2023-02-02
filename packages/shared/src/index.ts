@@ -1,3 +1,5 @@
+export { ShapeFlags } from "./shapeFlags"
+
 export const isObject = (val: unknown): val is Record<any, any> =>
   val !== null && typeof val === 'object'
 
@@ -10,3 +12,5 @@ export const hasChanged = (value: unknown, oldValue: unknown): boolean => !Objec
 export const NOOP = () => {}
 
 export const isFunction = (value: unknown): value is Function => typeof value === 'function'
+
+export const isString = (value: unknown): value is string => typeof value === 'string'
