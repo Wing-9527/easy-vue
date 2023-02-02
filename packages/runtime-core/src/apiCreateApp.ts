@@ -5,7 +5,7 @@
 import { createVNode } from "./vnode"
 
 export function createAppAPI(
-  render: unknown,
+  render: (...args: any[]) => any,
   hydrate?: unknown
 ) {
   return function createApp(rootComponent: unknown, rootProps: unknown = null) {
@@ -22,6 +22,7 @@ export function createAppAPI(
       ): any {
         if (!isMounted) {
           let vnode = createVNode(rootComponent, rootProps)
+          render(vnode, rootContainer, isSVG)
         }
       }
     }
