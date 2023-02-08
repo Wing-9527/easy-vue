@@ -10,7 +10,10 @@ export function createRenderer(options: any) {
 
 function baseCreateRenderer(options: any) {
   // patch
+  const patch = () => {}
+
   // unmount
+  const unmount = () => {}
   // patchComponent
   // ...
   const render = (vnode: unknown, container: unknown, isSVG: boolean) => {}
