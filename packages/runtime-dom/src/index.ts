@@ -1,7 +1,10 @@
 import { createRenderer } from "@easy-vue/runtime-core"
+import { extend } from "@easy-vue/shared"
 
-// const rendererOptions = /*#__PURE__*/ extend({ patchProp }, nodeOps)
-const rendererOptions = {} // 渲染器配置
+import { nodeOps } from './nodeOps'
+import { patchProp } from './patchProp'
+
+const rendererOptions = /*#__PURE__*/ extend({ patchProp }, nodeOps) // 渲染器配置
 let renderer: any // 渲染器
 
 function ensureRenderer() {

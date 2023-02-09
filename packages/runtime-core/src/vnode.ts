@@ -3,8 +3,12 @@
  */
 import { ShapeFlags, isString } from "@easy-vue/shared"
 
+export const Fragment = Symbol('Fragment')
+export const Text = Symbol('Text')
+export const Comment = Symbol('Comment')
+export const Static = Symbol('Static')
+
 export const createVNode =  _createVNode // ! 源码此处三元运算符判断是否为开发环境
-export const Fragment = Symbol(void 0)
 
 function _createVNode(
   type: any,
